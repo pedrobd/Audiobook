@@ -1,0 +1,1580 @@
+<title>Spoken Page</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<style>
+/* Layout: a listening room. Tracks on the left like an album's back cover, the text as a printed sheet in the middle, the transport docked along the bottom edge. */
+:root {
+  --paper: #EBEFF6;
+  --sheet: #FBFCFE;
+  --ink: #141A2A;
+  --muted: #586179;
+  --line: #D3DAE6;
+  --hover: #E3E8F3;
+  --accent: #2742D6;
+  --accent-ink: #FFFFFF;
+  --mark: #D8E0FF;
+  --deck: #141A2A;
+  --deck-ink: #E8ECF5;
+  --deck-muted: #98A1B7;
+  --deck-line: #2B3349;
+  --deck-accent: #9AACFF;
+  --danger: #B3261E;
+
+  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-read: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --deck-h: 132px;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0C101A; --sheet: #131926; --ink: #E3E7F0; --muted: #8B94A9; --line: #242C3F;
+    --hover: #1B2232; --accent: #8EA2FF; --accent-ink: #0C101A; --mark: #26336A;
+    --deck: #060912; --deck-ink: #E3E7F0; --deck-muted: #8B94A9; --deck-line: #1D2435; --deck-accent: #9AACFF;
+    --danger: #FF8A80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0C101A; --sheet: #131926; --ink: #E3E7F0; --muted: #8B94A9; --line: #242C3F;
+  --hover: #1B2232; --accent: #8EA2FF; --accent-ink: #0C101A; --mark: #26336A;
+  --deck: #060912; --deck-ink: #E3E7F0; --deck-muted: #8B94A9; --deck-line: #1D2435; --deck-accent: #9AACFF;
+  --danger: #FF8A80;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { background: var(--paper); color: var(--ink); }
+body { font-family: var(--f-display); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+
+/* Header */
+.top { padding-block: 18px 6px; }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+.brand svg { width: 30px; height: 30px; flex: none; }
+.top-note { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+
+/* Intro + dropzone */
+.intro { padding-block: 22px 26px; }
+.intro .wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 32px; align-items: stretch; }
+.intro h1 { font-size: clamp(28px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -0.025em; font-weight: 700; margin: 0 0 14px; text-wrap: balance; max-width: 18ch; }
+.intro h1 em { font-family: var(--f-read); font-style: italic; font-weight: 400; letter-spacing: -0.01em; color: var(--accent); }
+.intro p.lede { margin: 0 0 18px; color: var(--muted); font-size: 16px; max-width: 52ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.facts li { font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+
+.drop { position: relative; border: 1.5px dashed var(--line); border-radius: 18px; background: var(--sheet); padding: 26px; display: flex; flex-direction: column; justify-content: center; gap: 14px; min-height: 220px; transition: border-color .2s, background .2s; }
+.drop.over, body.dragging .drop { border-color: var(--accent); background: var(--mark); }
+.drop-head { display: flex; align-items: center; gap: 14px; }
+.drop-icon { width: 46px; height: 46px; border-radius: 12px; background: var(--hover); display: grid; place-items: center; flex: none; color: var(--accent); }
+.drop-title { font-weight: 600; font-size: 18px; line-height: 1.25; }
+.drop-sub { color: var(--muted); font-size: 13.5px; }
+.drop-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn { appearance: none; border: 0; border-radius: 999px; padding: 10px 18px; font-weight: 600; cursor: pointer; background: var(--accent); color: var(--accent-ink); }
+.btn:hover { filter: brightness(1.08); }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.ghost:hover { background: var(--hover); filter: none; }
+.drop-hint { font-size: 12.5px; color: var(--muted); }
+.status { display: grid; gap: 8px; }
+.status-line { font-family: var(--f-mono); font-size: 12.5px; color: var(--muted); }
+.status-line.err { color: var(--danger); font-family: var(--f-display); font-size: 14px; }
+.bar { height: 6px; border-radius: 99px; background: var(--hover); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .15s; }
+
+/* Book info strip */
+.book { padding-block: 0 18px; }
+.book .wrap { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; border-top: 1px solid var(--line); padding-top: 18px; }
+.book-title { font-family: var(--f-read); font-size: clamp(22px, 2.4vw, 28px); line-height: 1.2; font-weight: 500; margin: 0; text-wrap: balance; min-width: 0; }
+.book-title small { display: block; font-family: var(--f-display); font-size: 14px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+.sample-tag { display: inline-block; vertical-align: middle; font-family: var(--f-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; background: var(--hover); color: var(--muted); margin-left: 6px; }
+.stats { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; }
+.stats div { display: flex; flex-direction: column; }
+.stats dt { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.stats dd { margin: 0; font-family: var(--f-mono); font-size: 15px; font-variant-numeric: tabular-nums; }
+
+/* Main layout */
+.layout { padding-bottom: calc(var(--deck-h) + 28px); }
+.layout .wrap { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: start; }
+
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); max-height: calc(100vh - var(--deck-h) - 40px); display: flex; flex-direction: column; min-width: 0; }
+.toc-head { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 10px; }
+.toc-head h2 { margin: 0; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.toc-close { display: none; }
+.toc ol { list-style: none; margin: 0; padding: 0; overflow-y: auto; display: grid; gap: 2px; }
+.track { width: 100%; display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; text-align: left; background: none; border: 0; padding: 9px 10px; border-radius: 10px; cursor: pointer; }
+.track:hover { background: var(--hover); }
+.track .n { font-family: var(--f-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.track .t { font-size: 14px; line-height: 1.3; overflow-wrap: anywhere; }
+.track .d { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.track[aria-current="true"] { background: var(--hover); }
+.track[aria-current="true"] .t { font-weight: 600; color: var(--accent); }
+.track[aria-current="true"] .n { color: var(--accent); }
+
+.sheet { background: var(--sheet); border: 1px solid var(--line); border-radius: 18px; padding: clamp(22px, 4vw, 56px) clamp(18px, 5vw, 72px); min-width: 0; }
+.sheet-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 26px; font-size: 13px; color: var(--muted); }
+.sheet-bar .tracknum { font-family: var(--f-mono); font-size: 12px; letter-spacing: .04em; }
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+.switch input { appearance: none; width: 32px; height: 18px; border-radius: 99px; background: var(--line); position: relative; cursor: pointer; margin: 0; transition: background .2s; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--sheet); transition: transform .2s; }
+.switch input:checked { background: var(--accent); }
+.switch input:checked::after { transform: translateX(14px); }
+
+.text { max-width: 66ch; margin: 0 auto; font-family: var(--f-read); font-size: clamp(17px, 1.35vw, 20px); line-height: 1.68; }
+.text h2 { font-family: var(--f-display); font-size: clamp(24px, 2.6vw, 32px); line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 28px; font-weight: 700; text-wrap: balance; }
+.text p { margin: 0 0 1.05em; text-indent: 1.4em; overflow-wrap: break-word; }
+.text h2 + p { text-indent: 0; }
+.s { cursor: pointer; border-radius: 4px; transition: background-color .25s, box-shadow .25s; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.s:hover { background: var(--hover); box-shadow: 0 0 0 2px var(--hover); }
+.s.now { background: var(--mark); box-shadow: 0 0 0 3px var(--mark); }
+.chapter-end { display: flex; justify-content: center; margin-top: 34px; }
+.voice-tip { max-width: 66ch; margin: -6px auto 26px; display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--hover); font-size: 13.5px; line-height: 1.5; color: var(--ink); }
+.voice-tip b { font-weight: 600; }
+.voice-tip .vt-badge { flex: none; font-family: var(--f-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; background: var(--accent); color: var(--accent-ink); margin-top: 1px; }
+.voice-tip.ok .vt-badge { background: var(--mark); color: var(--accent); }
+.voice-tip ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }
+.vt-body { min-width: 0; flex: 1; }
+.voice-tip .bar { margin-top: 8px; }
+.vt-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.btn.small { padding: 6px 12px; font-size: 13px; }
+.sheet-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.play { position: relative; }
+.play.buffering::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--deck-accent); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.voice-tip .vt-x { margin-left: auto; flex: none; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 2px; }
+
+/* Deck */
+.deck { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--deck); color: var(--deck-ink); padding-bottom: env(safe-area-inset-bottom, 0px); border-top: 1px solid var(--deck-line); }
+.deck .wrap { padding-block: 12px 14px; display: grid; gap: 10px; }
+.spine-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.time { font-family: var(--f-mono); font-size: 12px; color: var(--deck-muted); font-variant-numeric: tabular-nums; min-width: 6ch; }
+.time:last-child { text-align: right; }
+.spine { position: relative; height: 14px; cursor: pointer; border-radius: 4px; }
+.spine-segs { position: absolute; inset: 4px 0; display: flex; gap: 2px; }
+.spine-segs i { display: block; background: var(--deck-line); border-radius: 2px; min-width: 2px; }
+.spine-fill { position: absolute; inset: 4px auto 4px 0; width: 0; background: var(--deck-accent); border-radius: 2px; pointer-events: none; -webkit-mask: var(--mask); mask: var(--mask); }
+.spine-knob { position: absolute; top: 0; width: 3px; height: 14px; background: var(--deck-ink); border-radius: 2px; transform: translateX(-1px); pointer-events: none; }
+
+.deck-main { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 16px; align-items: center; }
+.now { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.eq { display: flex; align-items: flex-end; gap: 3px; height: 22px; width: 22px; flex: none; }
+.eq i { flex: 1; background: var(--deck-accent); border-radius: 1px; height: 30%; transition: height .3s; }
+body.playing .eq i { animation: eq 1s ease-in-out infinite; }
+body.playing .eq i:nth-child(2) { animation-delay: -.35s; }
+body.playing .eq i:nth-child(3) { animation-delay: -.7s; }
+body.playing .eq i:nth-child(4) { animation-delay: -.15s; }
+@keyframes eq { 0%,100% { height: 25%; } 50% { height: 100%; } }
+.now-text { min-width: 0; }
+.now-ch { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.now-book { font-size: 12.5px; color: var(--deck-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.transport { display: flex; align-items: center; gap: 6px; }
+.tbtn { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: none; border: 0; color: var(--deck-ink); cursor: pointer; }
+.tbtn:hover { background: var(--deck-line); }
+.tbtn svg { width: 20px; height: 20px; fill: currentColor; }
+.play { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; border: 0; cursor: pointer; background: var(--deck-accent); color: var(--deck); margin: 0 4px; transition: transform .15s; }
+.play:hover { transform: scale(1.05); }
+.play:active { transform: scale(.97); }
+.play svg { width: 24px; height: 24px; fill: currentColor; }
+.play:disabled, .tbtn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.deck :focus-visible { outline-color: var(--deck-accent); }
+
+.settings { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
+.field { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.field span { font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--deck-muted); padding-left: 2px; }
+.field select { appearance: none; background: var(--deck-line); color: var(--deck-ink); border: 0; border-radius: 8px; padding: 6px 26px 6px 10px; font-size: 13px; cursor: pointer; max-width: 100%; color-scheme: dark;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 13px) 55%, calc(100% - 9px) 55%; background-size: 4px 4px; background-repeat: no-repeat; }
+.field.voice { flex: 0 1 220px; }
+.field.voice select { width: 100%; text-overflow: ellipsis; }
+.tracks-btn { display: none; background: var(--deck-line); color: var(--deck-ink); border: 0; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; align-self: flex-end; }
+
+.toast { position: fixed; left: 50%; bottom: calc(var(--deck-h) + 16px); transform: translate(-50%, 8px); background: var(--ink); color: var(--paper); padding: 9px 16px; border-radius: 10px; font-size: 13.5px; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 40; max-width: calc(100% - 32px); text-align: center; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.scrim { display: none; }
+
+@media (max-width: 1040px) {
+  .settings .field.voice { flex-basis: 170px; }
+  .deck-main { grid-template-columns: minmax(0, 1fr) auto; }
+  .settings { grid-column: 1 / -1; justify-content: flex-start; flex-wrap: wrap; }
+}
+@media (max-width: 860px) {
+  .intro .wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .layout .wrap { grid-template-columns: minmax(0, 1fr); }
+  .toc { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; top: auto; max-height: 72vh; background: var(--sheet); border-radius: 18px 18px 0 0; padding: 16px var(--gutter-r) calc(16px + env(safe-area-inset-bottom, 0px)) var(--gutter-l); transform: translateY(105%); transition: transform .3s ease; border-top: 1px solid var(--line); }
+  body.toc-open .toc { transform: none; }
+  body.toc-open .scrim { display: block; position: fixed; inset: 0; background: rgba(5, 8, 15, .45); z-index: 25; }
+  .toc-close { display: inline-flex; }
+  .tracks-btn { display: inline-block; }
+}
+@media (max-width: 560px) {
+  .deck-main { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .now { justify-content: center; text-align: center; }
+  .transport { justify-content: center; }
+  .settings { justify-content: center; }
+  .field.voice { flex: 1 1 100%; order: 5; }
+  .eq { display: none; }
+  .sheet { border-radius: 14px; }
+  .text p { text-indent: 1em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="9" fill="var(--accent)"/><path d="M8 10.5c2.6-.9 5-.6 7 .9v11c-2-1.5-4.4-1.8-7-.9z" fill="var(--accent-ink)"/><path d="M17 11.4c1-.75 2.1-1.15 3.3-1.25" stroke="var(--accent-ink)" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M17 15.4c1.8-1.2 3.8-1.5 6-1" stroke="var(--accent-ink)" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M17 19.4c1.3-.9 2.6-1.2 4-1.1" stroke="var(--accent-ink)" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+      Spoken Page
+    </div>
+    <div class="top-note">Runs in your browser · files stay on your device</div>
+  </div>
+</header>
+
+<section class="intro">
+  <div class="wrap">
+    <div>
+      <h1>Turn any PDF book into an <em>audiobook</em> you can press play on.</h1>
+      <p class="lede">Drop in a book. Spoken Page pulls out the text, splits it into tracks by chapter, and reads it aloud with the voice you pick. It remembers where you stopped.</p>
+      <ul class="facts">
+        <li>Chapters from the PDF outline or headings</li>
+        <li>Speed 0.75× to 2×</li>
+        <li>Sleep timer</li>
+        <li>Tap any sentence to jump there</li>
+      </ul>
+    </div>
+    <div class="drop" id="drop">
+      <div class="drop-head">
+        <div class="drop-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg></div>
+        <div>
+          <div class="drop-title" id="dropTitle">Drop a PDF book here</div>
+          <div class="drop-sub" id="dropSub">A sample chapter of Alice in Wonderland is loaded so you can try the player.</div>
+        </div>
+      </div>
+      <div class="drop-actions">
+        <button class="btn" id="bChoose" type="button">Choose a PDF</button>
+        <button class="btn ghost" id="bSample" type="button" hidden>Back to the sample</button>
+        <input type="file" id="file" accept="application/pdf,.pdf" hidden>
+      </div>
+      <div class="status" id="status" hidden>
+        <div class="status-line" id="statusLine"></div>
+        <div class="bar"><i id="statusBar"></i></div>
+      </div>
+      <div class="drop-hint">Works with PDFs that have selectable text. Scanned page images need OCR first.</div>
+    </div>
+  </div>
+</section>
+
+<section class="book">
+  <div class="wrap">
+    <h2 class="book-title" id="bookTitle">—</h2>
+    <dl class="stats">
+      <div><dt>Pages</dt><dd id="stPages">—</dd></div>
+      <div><dt>Tracks</dt><dd id="stTracks">—</dd></div>
+      <div><dt>Words</dt><dd id="stWords">—</dd></div>
+      <div><dt>Length at 1×</dt><dd id="stLen">—</dd></div>
+      <div><dt>Language</dt><dd id="stLang">—</dd></div>
+    </dl>
+  </div>
+</section>
+
+<main class="layout">
+  <div class="wrap">
+    <aside class="toc" id="toc" aria-label="Tracks">
+      <div class="toc-head">
+        <h2>Tracks</h2>
+        <button class="btn ghost toc-close" id="bTocClose" type="button">Close</button>
+      </div>
+      <ol id="tocList"></ol>
+    </aside>
+    <article class="sheet">
+      <div class="sheet-bar">
+        <span class="tracknum" id="trackNum">Track 1</span>
+        <div class="sheet-tools">
+          <button class="btn ghost small" id="bSave" type="button" hidden>Save track</button>
+          <label class="switch"><input type="checkbox" id="follow" checked> Follow the voice</label>
+        </div>
+      </div>
+      <div class="voice-tip" id="voiceTip" hidden></div>
+      <div class="text" id="text" aria-live="off"></div>
+    </article>
+  </div>
+</main>
+<div class="scrim" id="scrim"></div>
+
+<div class="deck" id="deck">
+  <div class="wrap">
+    <div class="spine-row">
+      <span class="time" id="tElapsed">0:00</span>
+      <div class="spine" id="spine" role="slider" tabindex="0" aria-label="Position in book" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="spine-segs" id="spineSegs"></div>
+        <div class="spine-fill" id="spineFill"></div>
+        <div class="spine-knob" id="spineKnob"></div>
+      </div>
+      <span class="time" id="tLeft">0:00</span>
+    </div>
+    <div class="deck-main">
+      <div class="now">
+        <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="now-text">
+          <div class="now-ch" id="nowCh">—</div>
+          <div class="now-book" id="nowBook">—</div>
+        </div>
+      </div>
+      <div class="transport">
+        <button class="tbtn" id="bPrevCh" type="button" aria-label="Previous track" title="Previous track (Shift ←)"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+        <button class="tbtn" id="bBack" type="button" aria-label="Previous sentence" title="Previous sentence (←)"><svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6zm.5-6 8.5 6V6z"/></svg></button>
+        <button class="play" id="bPlay" type="button" aria-label="Play" title="Play / pause (Space)"><svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg></button>
+        <button class="tbtn" id="bFwd" type="button" aria-label="Next sentence" title="Next sentence (→)"><svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6zm9-12v12l8.5-6z"/></svg></button>
+        <button class="tbtn" id="bNextCh" type="button" aria-label="Next track" title="Next track (Shift →)"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg></button>
+      </div>
+      <div class="settings">
+        <label class="field"><span>Speed</span>
+          <select id="selRate">
+            <option value="0.75">0.75×</option><option value="1">1×</option><option value="1.15">1.15×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="1.75">1.75×</option><option value="2">2×</option>
+          </select>
+        </label>
+        <label class="field voice"><span>Voice</span><select id="selVoice"><option>Loading voices…</option></select></label>
+        <label class="field"><span id="sleepLabel">Sleep</span>
+          <select id="selSleep">
+            <option value="off">Off</option><option value="5">5 min</option><option value="15">15 min</option><option value="30">30 min</option><option value="60">60 min</option><option value="chapter">End of track</option>
+          </select>
+        </label>
+        <button class="tracks-btn" id="bTracks" type="button">Tracks</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script>
+(() => {
+const $ = (s) => document.querySelector(s);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
+const BASE_WPM = 170;
+
+const state = {
+  book: null, idx: 0, playing: false, token: 0, renderedCh: -1,
+  rate: store.get('sp:rate', 1), voiceKey: store.get('sp:voiceKey', null), src: null,
+  follow: true, sleep: 'off', sleepEnd: 0, sleepTimer: null
+};
+let voices = [];
+let currentUtter = null;
+
+/* ---------- Text utilities ---------- */
+const ABBR = /\b(Mr|Mrs|Ms|Dr|Dra|Sr|Sra|Srta|St|Jr|Prof|Gen|Col|Lt|Capt|vs|etc|No|Nº|Vol|pp|cf|Av|e\.g|i\.e)\.$/i;
+function splitSentences(text) {
+  text = text.replace(/\s+/g, ' ').trim();
+  if (!text) return [];
+  const raw = text.match(/[^.!?…]+(?:[.!?…]+["'”’»)\]]*\s*|$)|[.!?…]+\s*/g) || [text];
+  const out = []; let buf = '';
+  raw.forEach((r, k) => {
+    buf += r;
+    const tb = buf.trim();
+    const last = k === raw.length - 1;
+    if (!last && (ABBR.test(tb) || /(^|\s)[A-Z]\.$/.test(tb) || !/\s$/.test(r))) return;
+    if (tb) out.push(tb);
+    buf = '';
+  });
+  if (buf.trim()) out.push(buf.trim());
+  const res = [];
+  for (const s of out) {
+    if (s.length <= 230) { res.push(s); continue; }
+    let rest = s;
+    while (rest.length > 230) {
+      let cut = -1;
+      for (const sep of ['; ', ': ', ' — ', ' – ', ', ', ' ']) {
+        const k = rest.lastIndexOf(sep, 210);
+        if (k > 70) { cut = k + sep.length; break; }
+      }
+      if (cut < 0) cut = 210;
+      res.push(rest.slice(0, cut).trim());
+      rest = rest.slice(cut);
+    }
+    if (rest.trim()) res.push(rest.trim());
+  }
+  return res;
+}
+const countWords = (t) => (t.match(/\S+/g) || []).length;
+
+const LANG_WORDS = {
+  en: ['the','and','of','to','was','that','with','he','she','it','is','you'],
+  pt: ['que','não','uma','com','os','para','ele','ela','do','da','em','se','é'],
+  es: ['que','el','los','una','con','por','las','del','y','en','se','es'],
+  fr: ['le','les','et','des','une','est','dans','pas','du','que','il','elle'],
+  de: ['und','der','die','das','nicht','ist','ein','zu','sie','er','es'],
+  it: ['che','il','non','una','per','gli','della','sono','di','è','la']
+};
+const LANG_NAMES = { en: 'English', pt: 'Portuguese', es: 'Spanish', fr: 'French', de: 'German', it: 'Italian' };
+function detectLang(text) {
+  const words = (text.toLowerCase().match(/[\p{L}]+/gu) || []).slice(0, 4000);
+  const freq = new Map();
+  words.forEach(w => freq.set(w, (freq.get(w) || 0) + 1));
+  let best = 'en', bestScore = -1;
+  for (const [lang, list] of Object.entries(LANG_WORDS)) {
+    const score = list.reduce((a, w) => a + (freq.get(w) || 0), 0);
+    if (score > bestScore) { best = lang; bestScore = score; }
+  }
+  return best;
+}
+
+function fmtClock(sec) {
+  sec = Math.max(0, Math.round(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  return h ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
+}
+function fmtDur(min) {
+  min = Math.max(1, Math.round(min));
+  if (min < 60) return `${min} min`;
+  return `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')}`;
+}
+const wordsToSec = (w) => w / (BASE_WPM * state.rate) * 60;
+
+/* ---------- Book model ---------- */
+function buildBook(meta, chapterDefs) {
+  const sentences = [], chapters = [];
+  for (const c of chapterDefs) {
+    const paras = c.paras.map(p => splitSentences(p)).filter(s => s.length);
+    if (!paras.length) continue;
+    const ci = chapters.length;
+    const ch = { title: c.title, start: sentences.length, paras: [], words: 0 };
+    const tw = countWords(c.title);
+    sentences.push({ t: c.title, ch: ci, w: tw, title: true });
+    ch.words += tw;
+    for (const ss of paras) {
+      const s0 = sentences.length;
+      for (const t of ss) { const w = countWords(t); sentences.push({ t, ch: ci, w }); ch.words += w; }
+      ch.paras.push([s0, sentences.length]);
+      sentences[sentences.length - 1].pe = true;
+    }
+    ch.end = sentences.length;
+    chapters.push(ch);
+  }
+  let acc = 0;
+  for (const s of sentences) { s.before = acc; acc += s.w; }
+  chapters.forEach(ch => { ch.before = sentences[ch.start].before; });
+  const sample = sentences.slice(0, 1500).map(s => s.t).join(' ');
+  return { ...meta, sentences, chapters, words: acc, lang: detectLang(sample) };
+}
+
+/* ---------- PDF parsing ---------- */
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+function itemsToLines(items) {
+  const lines = []; let cur = null;
+  const flush = () => { if (cur && cur.text.trim()) lines.push(cur); cur = null; };
+  for (const it of items) {
+    if (!('str' in it)) continue;
+    const x = it.transform[4], y = it.transform[5];
+    const h = Math.abs(it.transform[3]) || it.height || 10;
+    if (it.str) {
+      if (!cur || Math.abs(y - cur.y) > Math.max(h, cur.h) * 0.5) {
+        flush();
+        cur = { text: '', x, y, h, x2: x };
+      } else if (!/\s$/.test(cur.text) && !/^\s/.test(it.str) && x - cur.x2 > h * 0.12) {
+        cur.text += ' ';
+      }
+      cur.text += it.str;
+      cur.x2 = Math.max(cur.x2, x + (it.width || 0));
+      cur.h = Math.max(cur.h, h);
+    }
+    if (it.hasEOL) flush();
+  }
+  flush();
+  lines.forEach(l => { l.text = l.text.replace(/\s+/g, ' ').trim(); });
+  return lines.filter(l => l.text);
+}
+
+function linesToParas(lines) {
+  if (!lines.length) return [];
+  const minX = Math.min(...lines.map(l => l.x));
+  const maxW = Math.max(...lines.map(l => l.x2 - minX));
+  const gaps = [];
+  for (let i = 1; i < lines.length; i++) { const g = lines[i - 1].y - lines[i].y; if (g > 0) gaps.push(g); }
+  gaps.sort((a, b) => a - b);
+  const med = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 14;
+  const paras = []; let buf = ''; let prev = null;
+  for (const l of lines) {
+    if (prev) {
+      const g = prev.y - l.y;
+      const prevEnds = /[.!?:…"”’»]$/.test(prev.text);
+      const prevShort = (prev.x2 - minX) < maxW * 0.78;
+      const indent = l.x > minX + l.h * 0.8;
+      const sizeJump = Math.abs(l.h - prev.h) > prev.h * 0.25;
+      if (g > med * 1.5 || g < -2 || sizeJump || (prevEnds && (prevShort || indent))) {
+        if (buf) paras.push(buf);
+        buf = '';
+      }
+    }
+    if (!buf) buf = l.text;
+    else if (/[\p{L}]-$/u.test(buf) && /^[\p{Ll}]/u.test(l.text)) buf = buf.slice(0, -1) + l.text;
+    else buf += ' ' + l.text;
+    prev = l;
+  }
+  if (buf) paras.push(buf);
+  return paras;
+}
+
+const norm = (s) => s.toLowerCase().replace(/[\d\s.,:;\-–—'"“”’]+/g, ' ').trim();
+const isPageNum = (s) => /^[\s\-–—]*(page\s+|página\s+|p\.\s*)?([0-9]{1,4}|[ivxlcdm]{1,7})(\s*(of|de|\/)\s*[0-9]+)?[\s\-–—]*$/i.test(s);
+
+function stripRunningHeads(pages) {
+  const counts = new Map();
+  const bump = (l) => { if (!l) return; const k = norm(l.text); if (k.length < 2) return; counts.set(k, (counts.get(k) || 0) + 1); };
+  pages.forEach(ls => { bump(ls[0]); bump(ls[1]); bump(ls[ls.length - 1]); bump(ls[ls.length - 2]); });
+  const limit = Math.max(3, pages.length * 0.25);
+  return pages.map(ls => ls.filter((l, i) => {
+    const edge = i < 2 || i >= ls.length - 2;
+    if (!edge) return true;
+    if (isPageNum(l.text)) return false;
+    const k = norm(l.text);
+    return !(k.length >= 2 && (counts.get(k) || 0) >= limit && l.text.length < 90);
+  }));
+}
+
+const HEAD_RE = /^(chapter|chap\.|cap[ií]tulo|cap\.|chapitre|kapitel|capitolo|part|parte|partie|teil|book|livro|libro|prologue|pr[oó]logo|epilogue|ep[ií]logo|introduction|introdu[cç][aã]o|introducci[oó]n|preface|pref[aá]cio|prefacio|afterword|posf[aá]cio|conclusion|conclus[aã]o)\b/i;
+const ROMAN_RE = /^(?=[IVXLC])[IVXLC]{1,7}\.?$/;
+
+function findHeadings(paras) {
+  const heads = [];
+  paras.forEach((p, i) => {
+    const t = p.text.trim();
+    if (t.length > 90) return;
+    if (HEAD_RE.test(t) || ROMAN_RE.test(t) || /^\d{1,3}\.?$/.test(t) && paras[i + 1] && paras[i + 1].text.length < 70) heads.push(i);
+  });
+  return heads;
+}
+
+async function parsePdf(file, onProgress) {
+  const data = new Uint8Array(await file.arrayBuffer());
+  const pdf = await pdfjsLib.getDocument({ data, isEvalSupported: false, disableFontFace: true, useSystemFonts: true }).promise;
+  const n = pdf.numPages;
+  let pagesLines = [];
+  for (let p = 1; p <= n; p++) {
+    onProgress(`Reading page ${p} of ${n}`, p / n);
+    const page = await pdf.getPage(p);
+    const tc = await page.getTextContent();
+    pagesLines.push(itemsToLines(tc.items));
+    page.cleanup();
+  }
+  pagesLines = stripRunningHeads(pagesLines);
+
+  // Paragraphs with page numbers, joined across page breaks.
+  const paras = [];
+  pagesLines.forEach((ls, pi) => {
+    linesToParas(ls).forEach((text, k) => {
+      const prev = paras[paras.length - 1];
+      if (k === 0 && prev && prev.page === pi && !/[.!?…"”’»:]$/.test(prev.text) && /^[\p{Ll}(,;—–-]/u.test(text)) {
+        prev.text = /[\p{L}]-$/u.test(prev.text) ? prev.text.slice(0, -1) + text : prev.text + ' ' + text;
+      } else {
+        paras.push({ text, page: pi + 1 });
+      }
+    });
+  });
+
+  const totalChars = paras.reduce((a, p) => a + p.text.length, 0);
+  if (totalChars < 200) throw new Error('NOTEXT');
+
+  onProgress('Finding chapters…', 1);
+  let meta = {};
+  try { meta = (await pdf.getMetadata()).info || {}; } catch {}
+  let title = (meta.Title || '').trim().replace(/^Microsoft Word\s*-\s*/i, '').replace(/\.(docx?|pdf|indd|odt)$/i, '');
+  if (!title || title.length < 2 || /^untitled$/i.test(title)) title = file.name.replace(/\.pdf$/i, '').replace(/[_]+/g, ' ');
+  const author = (meta.Author || '').trim();
+
+  // 1. PDF outline
+  let marks = [];
+  try {
+    let outline = await pdf.getOutline();
+    if (outline && outline.length === 1 && outline[0].items && outline[0].items.length > 1) outline = outline[0].items;
+    if (outline && outline.length >= 2) {
+      for (const item of outline) {
+        let dest = item.dest;
+        if (typeof dest === 'string') dest = await pdf.getDestination(dest);
+        if (!Array.isArray(dest) || !dest[0]) continue;
+        const pi = typeof dest[0] === 'number' ? dest[0] : await pdf.getPageIndex(dest[0]);
+        marks.push({ title: (item.title || '').trim() || `Section ${marks.length + 1}`, page: pi + 1 });
+      }
+      marks.sort((a, b) => a.page - b.page);
+    }
+  } catch { marks = []; }
+
+  let chapterDefs = [];
+  if (marks.length >= 2) {
+    const starts = [];
+    for (const m of marks) {
+      let idx = paras.findIndex(p => p.page >= m.page);
+      if (idx < 0) continue;
+      const key = norm(m.title).slice(0, 24);
+      for (let j = idx; j < paras.length && paras[j].page === paras[idx].page; j++) {
+        if (key && norm(paras[j].text).startsWith(key)) { idx = j; break; }
+      }
+      if (starts.length && starts[starts.length - 1].idx >= idx) continue;
+      starts.push({ idx, title: m.title });
+    }
+    if (starts.length && starts[0].idx > 0) chapterDefs.push({ title: 'Opening pages', paras: paras.slice(0, starts[0].idx).map(p => p.text) });
+    starts.forEach((s, k) => {
+      const end = k + 1 < starts.length ? starts[k + 1].idx : paras.length;
+      let body = paras.slice(s.idx, end).map(p => p.text);
+      if (body.length && norm(body[0]).startsWith(norm(s.title).slice(0, 24)) && body[0].length < 120) body = body.slice(1);
+      chapterDefs.push({ title: s.title, paras: body });
+    });
+  } else {
+    // 2. Headings found in the text
+    const heads = findHeadings(paras);
+    if (heads.length >= 2) {
+      if (heads[0] > 0) chapterDefs.push({ title: 'Opening pages', paras: paras.slice(0, heads[0]).map(p => p.text) });
+      heads.forEach((h, k) => {
+        const end = k + 1 < heads.length ? heads[k + 1] : paras.length;
+        let t = paras[h].text, from = h + 1;
+        const nx = paras[h + 1];
+        if (nx && from < end && nx.text.length < 70 && !/[.,;]$/.test(nx.text)) { t += ' · ' + nx.text; from++; }
+        chapterDefs.push({ title: t, paras: paras.slice(from, end).map(p => p.text) });
+      });
+    } else {
+      // 3. Fall back to groups of pages
+      const per = n > 60 ? 12 : 8;
+      for (let a = 1; a <= n; a += per) {
+        const b = Math.min(n, a + per - 1);
+        chapterDefs.push({ title: `Pages ${a}–${b}`, paras: paras.filter(p => p.page >= a && p.page <= b).map(p => p.text) });
+      }
+    }
+  }
+  return { title, author, pages: n, id: `${file.name}:${file.size}`, chapterDefs };
+}
+
+/* ---------- Sample book ---------- */
+const SAMPLE = {
+  title: "Alice's Adventures in Wonderland", author: 'Lewis Carroll · opening pages', pages: 3, id: 'sample:alice', sample: true,
+  chapterDefs: [
+    { title: 'Chapter I · Down the Rabbit-Hole', paras: [
+      'Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it, “and what is the use of a book,” thought Alice “without pictures or conversations?”',
+      'So she was considering in her own mind (as well as she could, for the hot day made her feel very sleepy and stupid), whether the pleasure of making a daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly a White Rabbit with pink eyes ran close by her.',
+      'There was nothing so very remarkable in that; nor did Alice think it so very much out of the way to hear the Rabbit say to itself, “Oh dear! Oh dear! I shall be late!” (when she thought it over afterwards, it occurred to her that she ought to have wondered at this, but at the time it all seemed quite natural); but when the Rabbit actually took a watch out of its waistcoat-pocket, and looked at it, and then hurried on, Alice started to her feet, for it flashed across her mind that she had never before seen a rabbit with either a waistcoat-pocket, or a watch to take out of it, and burning with curiosity, she ran across the field after it, and fortunately was just in time to see it pop down a large rabbit-hole under the hedge.',
+      'In another moment down went Alice after it, never once considering how in the world she was to get out again.',
+      'The rabbit-hole went straight on like a tunnel for some way, and then dipped suddenly down, so suddenly that Alice had not a moment to think about stopping herself before she found herself falling down a very deep well.'
+    ]},
+    { title: 'Chapter II · The Pool of Tears', paras: [
+      '“Curiouser and curiouser!” cried Alice (she was so much surprised, that for the moment she quite forgot how to speak good English); “now I’m opening out like the largest telescope that ever was! Good-bye, feet!” (for when she looked down at her feet, they seemed to be almost out of sight, they were getting so far off).',
+      'Just then her head struck against the roof of the hall: in fact she was now more than nine feet high, and she at once took up the little golden key and hurried off to the garden door.'
+    ]},
+    { title: 'Chapter III · A Caucus-Race and a Long Tale', paras: [
+      'They were indeed a queer-looking party that assembled on the bank, the birds with draggled feathers, the animals with their fur clinging close to them, and all dripping wet, cross, and uncomfortable.'
+    ]}
+  ]
+};
+
+/* ---------- Rendering ---------- */
+const el = {
+  text: $('#text'), toc: $('#tocList'), trackNum: $('#trackNum'),
+  nowCh: $('#nowCh'), nowBook: $('#nowBook'), tElapsed: $('#tElapsed'), tLeft: $('#tLeft'),
+  spine: $('#spine'), segs: $('#spineSegs'), fill: $('#spineFill'), knob: $('#spineKnob'),
+  play: $('#bPlay'), playIcon: $('#playIcon'), rate: $('#selRate'), voice: $('#selVoice'), sleep: $('#selSleep'), sleepLabel: $('#sleepLabel'),
+  toast: $('#toast')
+};
+
+function toast(msg) {
+  el.toast.textContent = msg;
+  el.toast.classList.add('show');
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => el.toast.classList.remove('show'), 2800);
+}
+
+function renderBookInfo() {
+  const b = state.book;
+  const t = $('#bookTitle');
+  t.replaceChildren(document.createTextNode(b.title));
+  if (b.sample) { const tag = document.createElement('span'); tag.className = 'sample-tag'; tag.textContent = 'Sample'; t.appendChild(tag); }
+  if (b.author) { const sm = document.createElement('small'); sm.textContent = b.author; t.appendChild(sm); }
+  $('#stPages').textContent = b.pages.toLocaleString();
+  $('#stTracks').textContent = b.chapters.length;
+  $('#stWords').textContent = b.words.toLocaleString();
+  $('#stLen').textContent = fmtDur(b.words / BASE_WPM);
+  $('#stLang').textContent = LANG_NAMES[b.lang] || b.lang;
+  el.nowBook.textContent = b.title;
+}
+
+function renderToc() {
+  const b = state.book;
+  el.toc.replaceChildren(...b.chapters.map((ch, i) => {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'track'; btn.dataset.ch = i;
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = String(i + 1).padStart(2, '0');
+    const t = document.createElement('span'); t.className = 't'; t.textContent = ch.title;
+    const d = document.createElement('span'); d.className = 'd'; d.textContent = fmtDur(wordsToSec(ch.words) / 60);
+    btn.append(n, t, d);
+    li.appendChild(btn);
+    return li;
+  }));
+}
+
+function renderSpine() {
+  const b = state.book;
+  el.segs.replaceChildren(...b.chapters.map(ch => { const i = document.createElement('i'); i.style.flexGrow = Math.max(ch.words, 1); return i; }));
+  // mask the fill to the same segment gaps
+  requestAnimationFrame(() => {
+    const total = el.segs.clientWidth || 1;
+    const stops = [];
+    [...el.segs.children].forEach(seg => {
+      const a = seg.offsetLeft / total * 100, z = (seg.offsetLeft + seg.offsetWidth) / total * 100;
+      stops.push(`transparent ${a}%`, `#000 ${a}%`, `#000 ${z}%`, `transparent ${z}%`);
+    });
+    el.fill.style.setProperty('--mask', `linear-gradient(90deg, ${stops.join(',')})`);
+    el.fill.style.width = '100%';
+    updateProgress();
+  });
+}
+
+function renderChapter(ci) {
+  const b = state.book, ch = b.chapters[ci];
+  state.renderedCh = ci;
+  const frag = document.createDocumentFragment();
+  const h = document.createElement('h2');
+  h.appendChild(sentenceSpan(ch.start));
+  frag.appendChild(h);
+  for (const [a, z] of ch.paras) {
+    const p = document.createElement('p');
+    for (let i = a; i < z; i++) { p.appendChild(sentenceSpan(i)); if (i < z - 1) p.appendChild(document.createTextNode(' ')); }
+    frag.appendChild(p);
+  }
+  if (ci < b.chapters.length - 1) {
+    const end = document.createElement('div'); end.className = 'chapter-end';
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn ghost'; btn.dataset.ch = ci + 1;
+    btn.textContent = `Next track: ${b.chapters[ci + 1].title}`;
+    end.appendChild(btn); frag.appendChild(end);
+  }
+  el.text.replaceChildren(frag);
+  el.trackNum.textContent = `Track ${ci + 1} of ${b.chapters.length} · ${fmtDur(wordsToSec(ch.words) / 60)}`;
+  el.toc.querySelectorAll('.track').forEach(t => t.setAttribute('aria-current', String(+t.dataset.ch === ci)));
+}
+function sentenceSpan(i) {
+  const s = document.createElement('span');
+  s.className = 's'; s.dataset.i = i; s.textContent = state.book.sentences[i].t;
+  return s;
+}
+
+let lastMarked = null;
+function mark(i, scroll) {
+  const b = state.book, s = b.sentences[i];
+  if (!s) return;
+  if (s.ch !== state.renderedCh) { renderChapter(s.ch); lastMarked = null; }
+  if (lastMarked) lastMarked.classList.remove('now');
+  const node = el.text.querySelector(`[data-i="${i}"]`);
+  if (node) {
+    node.classList.add('now');
+    lastMarked = node;
+    if (scroll && state.follow) {
+      const r = node.getBoundingClientRect();
+      const deckH = $('#deck').offsetHeight;
+      if (r.top < 60 || r.bottom > innerHeight - deckH - 40) {
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        node.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+      }
+    }
+  }
+  el.nowCh.textContent = b.chapters[s.ch].title;
+  updateProgress();
+}
+
+function updateProgress() {
+  const b = state.book; if (!b) return;
+  const s = b.sentences[state.idx];
+  const pct = b.words ? s.before / b.words * 100 : 0;
+  el.knob.style.left = pct + '%';
+  el.fill.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+  el.spine.setAttribute('aria-valuenow', Math.round(pct));
+  el.spine.setAttribute('aria-valuetext', `${Math.round(pct)}%, track ${s.ch + 1}`);
+  el.tElapsed.textContent = fmtClock(wordsToSec(s.before));
+  el.tLeft.textContent = '−' + fmtClock(wordsToSec(b.words - s.before));
+}
+
+/* ---------- Voices ---------- */
+// Rank browser voices by how human they sound. Edge's "Online (Natural)" voices are neural,
+// Chrome's "Google" voices are network voices, Apple's Premium/Enhanced/Siri voices are downloaded neural voices.
+function voiceScore(v) {
+  const n = v.name;
+  let s = 0;
+  if (/natural|neural/i.test(n)) s += 6;
+  if (/premium/i.test(n)) s += 5;
+  if (/enhanced|siri/i.test(n)) s += 4;
+  if (/online/i.test(n)) s += 2;
+  if (/^google/i.test(n)) s += 3;
+  if (/espeak|compact|novelty|bad news|bells|boing|bubbles|cellos|whisper|zarvox|jester|organ|trinoids|wobble|albert|bahh/i.test(n)) s -= 6;
+  return s;
+}
+const isNatural = (v) => voiceScore(v) >= 3;
+function voiceLabel(v) {
+  const name = v.name.replace(/^(Microsoft|Google|Apple)\s+/i, '').replace(/\s+Online\s*\(Natural\)/i, '').replace(/\s+-\s+.*$/, '').replace(/\s*\((Premium|Enhanced)\)/i, '');
+  return `${isNatural(v) ? '★ ' : ''}${name} · ${v.lang}${isNatural(v) ? ' · natural' : ''}`;
+}
+const speakable = (t) => t.replace(/\s+·\s+/g, '. ');
+
+// Piper neural voices run on this device. A voice model downloads once from Hugging Face
+// and stays in the browser's cache; synthesis happens in a worker so the page stays smooth.
+const PIPER = Object.assign({
+  ortJs: 'https://cdnjs.cloudflare.com/ajax/libs/onnxruntime-web/1.18.0/ort.min.js',
+  ortWasm: 'https://cdnjs.cloudflare.com/ajax/libs/onnxruntime-web/1.18.0/',
+  phonJs: 'https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/build/piper_phonemize.js',
+  phonWasm: 'https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/build/piper_phonemize.wasm',
+  phonData: 'https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/build/piper_phonemize.data',
+  hosts: ['https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0', 'https://huggingface.co/diffusionstudio/piper-voices/resolve/main']
+}, window.SPOKEN_PAGE_PIPER || {});
+const PIPER_CACHE = 'spoken-page-voices-v1';
+const PIPER_VOICES = [
+  ['pt_PT-tugão-medium', 'Tugão', 'Portugal', 63],
+  ['pt_BR-faber-medium', 'Faber', 'Brasil', 63],
+  ['en_US-hfc_female-medium', 'HFC Female', 'US', 63],
+  ['en_US-lessac-medium', 'Lessac', 'US', 63],
+  ['en_US-ryan-high', 'Ryan', 'US', 121],
+  ['en_GB-alba-medium', 'Alba', 'UK', 63],
+  ['en_GB-jenny_dioco-medium', 'Jenny', 'UK', 63],
+  ['es_ES-davefx-medium', 'Davefx', 'España', 63],
+  ['es_MX-claude-high', 'Claude', 'México', 63],
+  ['fr_FR-siwis-medium', 'Siwis', 'France', 63],
+  ['fr_FR-tom-medium', 'Tom', 'France', 64],
+  ['de_DE-thorsten-medium', 'Thorsten', 'Deutschland', 63],
+  ['it_IT-riccardo-x_low', 'Riccardo', 'Italia', 28]
+].map(([id, name, region, mb]) => ({ id, name, region, mb, lang: id.slice(0, 2) }));
+function piperUrls(id, ext) {
+  const [code, name, q] = id.split('-');
+  const path = `${code.split('_')[0]}/${code}/${encodeURIComponent(name)}/${q}/${encodeURIComponent(id)}${ext}`;
+  return PIPER.hosts.map(h => `${h}/${path}`);
+}
+
+// Runs inside a Web Worker (serialized with toString), so it may only use its own scope.
+function piperWorkerMain() {
+  const CACHE = 'spoken-page-voices-v1';
+  let ort = null, phon = null, session = null, config = null, printed = null;
+  const hi = [], lo = [];
+  let busy = false;
+
+  async function getBuf(urls, onProgress) {
+    urls = [].concat(urls);
+    let cache = null;
+    try { cache = self.caches ? await caches.open(CACHE) : null; } catch (e) { cache = null; }
+    if (cache) {
+      for (const u of urls) {
+        try { const hit = await cache.match(u); if (hit) return await hit.arrayBuffer(); } catch (e) {}
+      }
+    }
+    let lastErr = null;
+    for (const u of urls) {
+      try {
+        const res = await fetch(u);
+        if (!res.ok) throw new Error('HTTP ' + res.status + ' for ' + u);
+        let buf;
+        if (onProgress && res.body) {
+          const total = +(res.headers.get('Content-Length') || 0);
+          const reader = res.body.getReader();
+          const chunks = [];
+          let loaded = 0;
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value); loaded += value.length;
+            onProgress(loaded, total);
+          }
+          const out = new Uint8Array(loaded);
+          let o = 0;
+          for (const c of chunks) { out.set(c, o); o += c.length; }
+          buf = out.buffer;
+        } else {
+          buf = await res.arrayBuffer();
+        }
+        if (cache) { try { await cache.put(u, new Response(new Blob([buf]))); } catch (e) {} }
+        return buf;
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error('Download failed');
+  }
+
+  function phonemize(text) {
+    printed = null;
+    phon.callMain(['-l', config.espeak.voice, '--input', JSON.stringify([{ text }]), '--espeak_data', '/espeak-ng-data']);
+    if (!printed || !printed.length) throw new Error('No phonemes for this sentence');
+    return printed;
+  }
+
+  async function handle(m) {
+    try {
+      if (m.type === 'init') {
+        importScripts(m.ortJs, m.phonJs);
+        ort = self.ort;
+        ort.env.wasm.wasmPaths = m.ortWasm;
+        ort.env.wasm.numThreads = m.threads;
+        const [wasm, data] = await Promise.all([getBuf(m.phonWasm), getBuf(m.phonData)]);
+        phon = await self.createPiperPhonemize({
+          print: (d) => { try { const j = JSON.parse(d); if (j.phoneme_ids) printed = j.phoneme_ids; } catch (e) {} },
+          printErr: () => {},
+          wasmBinary: wasm,
+          getPreloadedPackage: () => data,
+          locateFile: (u) => u
+        });
+        postMessage({ type: 'ready' });
+      } else if (m.type === 'load') {
+        session = null;
+        config = JSON.parse(new TextDecoder().decode(await getBuf(m.configUrls)));
+        const model = await getBuf(m.modelUrls, (loaded, total) => postMessage({ type: 'progress', id: m.id, loaded, total }));
+        postMessage({ type: 'progress', id: m.id, loaded: 1, total: 1, phase: 'prepare' });
+        session = await ort.InferenceSession.create(new Uint8Array(model));
+        postMessage({ type: 'loaded', id: m.id, sampleRate: config.audio.sample_rate, lengthScale: config.inference.length_scale });
+      } else if (m.type === 'synth') {
+        const ids = phonemize(m.text);
+        const feeds = {
+          input: new ort.Tensor('int64', BigInt64Array.from(ids, (v) => BigInt(v)), [1, ids.length]),
+          input_lengths: new ort.Tensor('int64', BigInt64Array.from([BigInt(ids.length)]), [1]),
+          scales: new ort.Tensor('float32', Float32Array.from([config.inference.noise_scale, m.lengthScale, config.inference.noise_w]), [3])
+        };
+        if (config.num_speakers > 1) feeds.sid = new ort.Tensor('int64', BigInt64Array.from([0n]), [1]);
+        const out = await session.run(feeds);
+        const pcm = new Float32Array(out.output.data);
+        postMessage({ type: 'audio', req: m.req, pcm }, [pcm.buffer]);
+      }
+    } catch (err) {
+      postMessage({ type: 'error', req: m.req, id: m.id, stage: m.type, message: String((err && err.message) || err) });
+    }
+  }
+
+  async function pump() {
+    if (busy) return;
+    busy = true;
+    while (hi.length || lo.length) await handle(hi.length ? hi.shift() : lo.shift());
+    busy = false;
+  }
+
+  self.onmessage = (e) => {
+    const m = e.data;
+    if (m.type === 'drop') {
+      // Forget queued sentences nobody is waiting for any more (after a seek, pause or cancel).
+      const q = m.low ? lo : hi;
+      for (let k = q.length - 1; k >= 0; k--) {
+        if (q[k].type === 'synth') { postMessage({ type: 'dropped', req: q[k].req }); q.splice(k, 1); }
+      }
+      return;
+    }
+    (m.low ? lo : hi).push(m);
+    pump();
+  };
+}
+
+const piper = {
+  status: 'checking', worker: null, ready: null, init: null, loads: new Map(),
+  voiceId: null, loadingId: null, loadP: null, progress: null, error: null,
+  sampleRate: 22050, baseLength: 1, req: 0, waiters: new Map(), cache: new Map(), saved: new Set()
+};
+let actx = null;
+
+function piperWant() { return state.voiceKey && state.voiceKey.startsWith('piper:') ? state.voiceKey.slice(6) : null; }
+function engine() { return piperWant() && piper.status === 'available' ? 'piper' : 'web'; }
+
+function piperStart() {
+  if (piper.ready) return piper.ready;
+  piper.ready = new Promise((resolve, reject) => {
+    let w;
+    try {
+      w = new Worker(URL.createObjectURL(new Blob([`(${piperWorkerMain.toString()})()`], { type: 'text/javascript' })));
+    } catch (e) { reject(e); return; }
+    piper.worker = w;
+    piper.init = { resolve, reject };
+    w.onmessage = onPiperMessage;
+    w.onerror = (e) => reject(new Error(e.message || 'The voice engine failed to start'));
+    w.postMessage({
+      type: 'init', ortJs: PIPER.ortJs, ortWasm: PIPER.ortWasm, phonJs: PIPER.phonJs, phonWasm: PIPER.phonWasm, phonData: PIPER.phonData,
+      threads: self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1
+    });
+  });
+  piper.ready.catch(() => {
+    if (piper.worker) piper.worker.terminate();
+    piper.worker = null; piper.ready = null; piper.voiceId = null;
+  });
+  return piper.ready;
+}
+
+function onPiperMessage(e) {
+  const m = e.data;
+  if (m.type === 'ready') {
+    piper.init.resolve();
+  } else if (m.type === 'progress') {
+    piper.progress = m; updateVoiceTip();
+  } else if (m.type === 'loaded') {
+    piper.voiceId = m.id; piper.sampleRate = m.sampleRate; piper.baseLength = m.lengthScale || 1;
+    piper.saved.add(m.id); piper.progress = null;
+    const w = piper.loads.get(m.id); if (w) { piper.loads.delete(m.id); w.resolve(); }
+  } else if (m.type === 'audio' || m.type === 'dropped' || (m.type === 'error' && m.req != null)) {
+    const w = piper.waiters.get(m.req);
+    if (!w) return;
+    piper.waiters.delete(m.req);
+    if (m.type === 'audio') w.resolve(m.pcm); else w.reject(new Error(m.type === 'dropped' ? 'dropped' : m.message));
+  } else if (m.type === 'error') {
+    if (m.stage === 'init') piper.init.reject(new Error(m.message));
+    if (m.stage === 'load') { const w = piper.loads.get(m.id); if (w) { piper.loads.delete(m.id); w.reject(new Error(m.message)); } }
+  }
+}
+
+function piperReset() {
+  // Drop queued playback sentences and forget prepared audio.
+  piper.cache.clear();
+  if (piper.worker) piper.worker.postMessage({ type: 'drop' });
+}
+
+function piperLoad(id) {
+  if (!id) return Promise.reject(new Error('No Piper voice selected'));
+  if (piper.voiceId === id && !piper.loadingId) return Promise.resolve();
+  if (piper.loadingId === id && piper.loadP) return piper.loadP;
+  piper.loadingId = id; piper.error = null; piper.progress = { id, loaded: 0, total: 0 };
+  piperReset();
+  updateVoiceTip();
+  const p = piperStart().then(() => new Promise((resolve, reject) => {
+    piper.loads.set(id, { resolve, reject });
+    piper.worker.postMessage({ type: 'load', id, configUrls: piperUrls(id, '.onnx.json'), modelUrls: piperUrls(id, '.onnx') });
+  }));
+  piper.loadP = p.then(() => {
+    if (piper.loadingId === id) { piper.loadingId = null; piper.loadP = null; }
+    populateVoices();
+  }, (err) => {
+    if (piper.loadingId === id) { piper.loadingId = null; piper.loadP = null; }
+    piper.progress = null; piper.error = { id, message: err.message };
+    updateVoiceTip();
+    throw err;
+  });
+  return piper.loadP;
+}
+
+function piperSynth(text, low) {
+  const req = ++piper.req;
+  const p = new Promise((resolve, reject) => piper.waiters.set(req, { resolve, reject }));
+  piper.worker.postMessage({ type: 'synth', req, low: !!low, text: speakable(text), lengthScale: piper.baseLength / state.rate });
+  return p;
+}
+
+function piperAudio(i) {
+  let p = piper.cache.get(i);
+  if (!p) {
+    p = piperSynth(state.book.sentences[i].t).then((pcm) => {
+      const buf = actx.createBuffer(1, Math.max(1, pcm.length), piper.sampleRate);
+      buf.copyToChannel(pcm, 0);
+      return buf;
+    });
+    piper.cache.set(i, p);
+    p.catch(() => { if (piper.cache.get(i) === p) piper.cache.delete(i); });
+  }
+  return p;
+}
+
+function ensureAudio() {
+  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === 'suspended') actx.resume();
+}
+function stopAudio() {
+  if (state.src) { state.src.onended = null; try { state.src.stop(); } catch {} state.src = null; }
+}
+function setBuffering(on) { el.play.classList.toggle('buffering', !!on); }
+
+async function piperCheck() {
+  if (!('Worker' in window) || typeof WebAssembly !== 'object' || !(window.AudioContext || window.webkitAudioContext)) {
+    piper.status = 'unavailable'; populateVoices(); return;
+  }
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 8000);
+  let ok = false;
+  try {
+    for (const u of piperUrls(PIPER_VOICES[0].id, '.onnx.json')) {
+      try { const r = await fetch(u, { signal: ctl.signal }); if (r.ok) { ok = true; break; } } catch {}
+    }
+    if (ok) ok = await fetch(PIPER.phonJs, { method: 'HEAD', signal: ctl.signal }).then(r => r.ok, () => false);
+  } catch { ok = false; }
+  clearTimeout(timer);
+  piper.status = ok ? 'available' : 'unavailable';
+  if (ok) {
+    try {
+      const cache = await caches.open(PIPER_CACHE);
+      for (const v of PIPER_VOICES) {
+        for (const u of piperUrls(v.id, '.onnx')) { if (await cache.match(u)) { piper.saved.add(v.id); break; } }
+      }
+    } catch {}
+  }
+  populateVoices();
+}
+
+function loadVoices() {
+  if (!synth) return;
+  voices = synth.getVoices();
+  populateVoices();
+}
+function bestVoiceFor(lang) {
+  const match = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith(lang));
+  if (!match.length) return voices.find(v => v.default) || voices[0] || null;
+  return [...match].sort((a, b) => voiceScore(b) - voiceScore(a) || (b.default - a.default))[0];
+}
+function currentVoice() {
+  const k = state.voiceKey || '';
+  return k.startsWith('web:') ? voices.find(v => 'web:' + v.voiceURI === k) || null : null;
+}
+function chooseDefaultVoice(lang) {
+  const key = state.voiceKey || '';
+  const picked = store.get('sp:voicePicked', false);
+  const piperV = key.startsWith('piper:') ? PIPER_VOICES.find(v => 'piper:' + v.id === key) : null;
+  // Keep a voice the listener chose for this book, even in another language.
+  if (key && state.book && state.pickedFor === state.book.id && !(piperV && piper.status === 'unavailable')) return;
+  if (piperV && piperV.lang === lang && piper.status !== 'unavailable') return;
+  const webV = currentVoice();
+  const webFits = webV && webV.lang.toLowerCase().startsWith(lang);
+  // A Piper voice already downloaded for this language beats any browser voice.
+  const savedPiper = piper.status === 'available' ? PIPER_VOICES.find(v => v.lang === lang && piper.saved.has(v.id)) : null;
+  if (savedPiper && !(picked && webFits)) { state.voiceKey = 'piper:' + savedPiper.id; return; }
+  const best = bestVoiceFor(lang);
+  if (webFits && (picked || !best || voiceScore(best) <= voiceScore(webV))) return;
+  if (best) state.voiceKey = 'web:' + best.voiceURI;
+  else if (!(piperV && piper.status === 'checking')) state.voiceKey = null;
+}
+function piperLabel(v) {
+  return `★ ${v.name} · ${v.region} · Piper · ${piper.saved.has(v.id) ? 'downloaded' : v.mb + ' MB'}`;
+}
+function populateVoices() {
+  const lang = state.book ? state.book.lang : 'en';
+  const langName = LANG_NAMES[lang] || lang;
+  chooseDefaultVoice(lang);
+  const groups = [];
+  const og = (label) => { const g = document.createElement('optgroup'); g.label = label; groups.push(g); return g; };
+  if (piper.status === 'available') {
+    const g = og(`Natural voices · ${langName}`);
+    PIPER_VOICES.filter(v => v.lang === lang).forEach(v => g.appendChild(new Option(piperLabel(v), 'piper:' + v.id)));
+  }
+  if (voices.length) {
+    const g1 = og(`Browser voices · ${langName}`), g2 = og('Browser voices · other languages');
+    [...voices].sort((a, b) => voiceScore(b) - voiceScore(a) || a.lang.localeCompare(b.lang) || a.name.localeCompare(b.name))
+      .forEach(v => (v.lang.toLowerCase().startsWith(lang) ? g1 : g2).appendChild(new Option(voiceLabel(v), 'web:' + v.voiceURI)));
+  }
+  if (piper.status === 'available') {
+    const g = og('Natural voices · other languages');
+    PIPER_VOICES.filter(v => v.lang !== lang).forEach(v => g.appendChild(new Option(piperLabel(v), 'piper:' + v.id)));
+  }
+  const filled = groups.filter(g => g.children.length);
+  if (filled.length) el.voice.replaceChildren(...filled);
+  else el.voice.replaceChildren(new Option(piper.status === 'checking' ? 'Loading voices…' : 'System default', ''));
+  if (state.voiceKey) el.voice.value = state.voiceKey;
+  updateVoiceTip(); updateSaveBtn();
+}
+
+function selectVoice(key, byUser) {
+  const wasPlaying = state.playing;
+  if (wasPlaying) pause();
+  state.voiceKey = key || null;
+  store.set('sp:voiceKey', state.voiceKey);
+  if (byUser) { store.set('sp:voicePicked', true); state.pickedFor = state.book && state.book.id; }
+  if (el.voice.value !== (key || '')) el.voice.value = key || '';
+  if (engine() === 'piper') piperLoad(piperWant()).catch(() => {});
+  updateVoiceTip(); updateSaveBtn();
+  if (wasPlaying) play();
+}
+
+let tipDismissed = store.get('sp:tipx', false);
+const BROWSER_TIPS = '<ul><li><b>Microsoft Edge</b> (Windows, Mac, Android): its free “Natural” voices are the most human of the built-in options.</li><li><b>Mac, iPhone, iPad</b>: Settings › Accessibility › Spoken Content › Voices, download a <b>Premium</b> or <b>Enhanced</b> voice, then reload.</li><li><b>Chrome</b>: the “Google” voices sound better than the system ones.</li></ul>';
+function updateVoiceTip() {
+  const tip = $('#voiceTip');
+  if (!tip) return;
+  const lang = state.book ? state.book.lang : 'en';
+  const langName = LANG_NAMES[lang] || lang;
+  const eng = engine();
+  const cur = currentVoice();
+  const want = PIPER_VOICES.find(v => v.id === piperWant());
+  const offer = PIPER_VOICES.filter(v => v.lang === lang);
+  const badge = document.createElement('span'); badge.className = 'vt-badge';
+  const body = document.createElement('div'); body.className = 'vt-body';
+  let cls = 'voice-tip', dismissable = true;
+
+  if (eng === 'piper' && piper.loadingId === want.id) {
+    const p = piper.progress || {};
+    const done = (p.loaded || 0) / 1e6, total = p.total ? p.total / 1e6 : want.mb;
+    badge.textContent = 'Downloading'; dismissable = false;
+    body.innerHTML = p.phase === 'prepare'
+      ? `<b>Preparing ${want.name}…</b> Almost ready.`
+      : `<b>Getting the ${want.name} voice ready.</b> ${done.toFixed(0)} of ${total.toFixed(0)} MB. It downloads once and stays saved in this browser.`;
+    const bar = document.createElement('div'); bar.className = 'bar';
+    const fill = document.createElement('i'); fill.style.width = (p.phase === 'prepare' ? 100 : Math.min(100, done / total * 100)) + '%';
+    bar.appendChild(fill); body.appendChild(bar);
+  } else if (eng === 'piper' && piper.error && piper.error.id === want.id) {
+    badge.textContent = 'Problem'; dismissable = false;
+    body.innerHTML = `<b>The ${want.name} voice didn't download.</b> Check your internet connection and try again.`;
+    const acts = document.createElement('div'); acts.className = 'vt-actions';
+    const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'btn small'; retry.textContent = 'Try again';
+    retry.addEventListener('click', () => piperLoad(want.id).catch(() => {}));
+    acts.appendChild(retry); body.appendChild(acts);
+  } else if (eng === 'piper') {
+    cls += ' ok'; badge.textContent = 'Natural';
+    body.innerHTML = `Reading with <b>${want.name}</b>, a Piper neural voice running on your device. Use <b>Save track</b> to keep a chapter as an audio file.`;
+  } else if (piper.status === 'available' && offer.length) {
+    badge.textContent = 'Tip';
+    body.innerHTML = `<b>Want a more human voice?</b> Piper voices are neural voices that run on your device. Each one downloads once and is saved for next time.`;
+    const acts = document.createElement('div'); acts.className = 'vt-actions';
+    offer.forEach(v => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn small';
+      b.textContent = `Use ${v.name} · ${v.region}${piper.saved.has(v.id) ? '' : ` · ${v.mb} MB`}`;
+      b.addEventListener('click', () => selectVoice('piper:' + v.id, true));
+      acts.appendChild(b);
+    });
+    body.appendChild(acts);
+  } else if (cur && isNatural(cur)) {
+    cls += ' ok'; badge.textContent = 'Natural';
+    body.innerHTML = 'Reading with a natural-sounding voice. Voices marked <b>★</b> in the Voice menu are the most human ones on this device.';
+  } else if (piper.status === 'unavailable') {
+    badge.textContent = 'Tip';
+    body.innerHTML = `<b>Piper neural voices can't load on this page.</b> They download a voice model from Hugging Face, which this page can't reach from where it's hosted (pages inside claude.ai block it). Open your own hosted copy of Spoken Page to use them. Until then, the most human browser voices are:${BROWSER_TIPS}`;
+  } else if (piper.status === 'checking') {
+    tip.hidden = true; return;
+  } else {
+    badge.textContent = 'Tip';
+    body.innerHTML = `<b>Want a more human voice?</b> There is no Piper voice for ${langName} yet, and this browser has no natural ${langName} voice. Free ways to get one:${BROWSER_TIPS}`;
+  }
+  tip.className = cls;
+  tip.replaceChildren(badge, body);
+  if (dismissable) {
+    if (tipDismissed) { tip.hidden = true; return; }
+    const x = document.createElement('button'); x.type = 'button'; x.className = 'vt-x'; x.setAttribute('aria-label', 'Hide tip'); x.textContent = '×';
+    x.addEventListener('click', () => { tip.hidden = true; tipDismissed = true; store.set('sp:tipx', true); });
+    tip.appendChild(x);
+  }
+  tip.hidden = false;
+}
+
+/* ---------- Save a track as audio (Piper only) ---------- */
+let saving = null;
+function updateSaveBtn() {
+  const btn = $('#bSave');
+  if (btn) btn.hidden = engine() !== 'piper';
+}
+function wavFrom(parts, length, rate) {
+  const view = new DataView(new ArrayBuffer(44 + length * 2));
+  const str = (o, s) => { for (let k = 0; k < s.length; k++) view.setUint8(o + k, s.charCodeAt(k)); };
+  str(0, 'RIFF'); view.setUint32(4, 36 + length * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
+  view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+  view.setUint32(24, rate, true); view.setUint32(28, rate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+  str(36, 'data'); view.setUint32(40, length * 2, true);
+  const out = new Int16Array(view.buffer, 44);
+  let o = 0;
+  for (const p of parts) { out.set(p, o); o += p.length; }
+  return new Blob([view.buffer], { type: 'audio/wav' });
+}
+function toInt16(pcm) {
+  const out = new Int16Array(pcm.length);
+  for (let k = 0; k < pcm.length; k++) { const v = Math.max(-1, Math.min(1, pcm[k])); out[k] = v < 0 ? v * 32768 : v * 32767; }
+  return out;
+}
+async function saveTrack() {
+  const btn = $('#bSave');
+  if (saving) { saving.cancel = true; if (piper.worker) piper.worker.postMessage({ type: 'drop', low: true }); return; }
+  const b = state.book, ci = state.renderedCh, ch = b.chapters[ci];
+  const job = saving = { cancel: false };
+  btn.textContent = 'Preparing… · Cancel';
+  try {
+    await piperLoad(piperWant());
+    const parts = [];
+    let length = 0;
+    const total = ch.end - ch.start;
+    for (let i = ch.start; i < ch.end; i++) {
+      if (job.cancel) throw new Error('cancelled');
+      btn.textContent = `Saving ${Math.round((i - ch.start) / total * 100)}% · Cancel`;
+      const pcm = toInt16(await piperSynth(b.sentences[i].t, true));
+      const s = b.sentences[i];
+      const gap = new Int16Array(Math.round(piper.sampleRate * (s.title ? 0.65 : s.pe ? 0.38 : 0.14) / state.rate));
+      parts.push(pcm, gap); length += pcm.length + gap.length;
+    }
+    const name = `${b.title} - ${String(ci + 1).padStart(2, '0')} ${ch.title}`
+      .replace(/[\\/:*?"<>|·]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120) + '.wav';
+    const url = URL.createObjectURL(wavFrom(parts, length, piper.sampleRate));
+    const a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 60000);
+    toast(`Saved “${name}”`);
+  } catch (e) {
+    if (e.message !== 'cancelled' && e.message !== 'dropped') toast("The track couldn't be saved. Try again.");
+  } finally {
+    saving = null; btn.textContent = 'Save track';
+  }
+}
+
+/* ---------- Playback ---------- */
+function setPlayingUI() {
+  document.body.classList.toggle('playing', state.playing);
+  el.play.setAttribute('aria-label', state.playing ? 'Pause' : 'Play');
+  el.playIcon.innerHTML = state.playing ? '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
+}
+function savePos() { if (state.book) store.set('sp:pos:' + state.book.id, state.idx); }
+
+function speak(i) {
+  const b = state.book;
+  if (i >= b.sentences.length) { pause(); state.idx = b.sentences.length - 1; toast('End of the book'); return; }
+  if (engine() === 'piper') speakPiper(i); else speakWeb(i);
+}
+function advance(i) {
+  const b = state.book, next = b.sentences[i + 1];
+  if (state.sleep === 'chapter' && next && next.ch !== b.sentences[i].ch) {
+    state.idx = i + 1; pause(); mark(i + 1, false); clearSleep(); toast('Sleep timer: stopped at the end of the track'); return;
+  }
+  speak(i + 1);
+}
+function speakWeb(i) {
+  const b = state.book;
+  state.idx = i; mark(i, true); savePos();
+  const tok = ++state.token;
+  if (!synth) { pause(); return; }
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(speakable(b.sentences[i].t));
+  const v = currentVoice();
+  if (v) { u.voice = v; u.lang = v.lang; } else u.lang = b.lang;
+  u.rate = state.rate;
+  u.onend = () => { if (tok === state.token && state.playing) advance(i); };
+  u.onerror = (e) => {
+    if (tok !== state.token) return;
+    if (e.error === 'interrupted' || e.error === 'canceled') return;
+    if (e.error === 'not-allowed') { pause(); toast('Press play to start the voice'); return; }
+    if (state.playing) setTimeout(() => { if (tok === state.token && state.playing) advance(i); }, 60);
+  };
+  currentUtter = u;
+  synth.speak(u);
+}
+async function speakPiper(i) {
+  const b = state.book;
+  state.idx = i; mark(i, true); savePos();
+  const tok = ++state.token;
+  stopAudio();
+  for (const k of piper.cache.keys()) if (k < i || k > i + 6) piper.cache.delete(k);
+  const slow = setTimeout(() => { if (tok === state.token) setBuffering(true); }, 250);
+  let buf;
+  try {
+    await piperLoad(piperWant());
+    if (tok !== state.token) return;
+    const p = piperAudio(i);
+    for (let k = 1; k <= 3 && i + k < b.sentences.length; k++) piperAudio(i + k);
+    buf = await p;
+  } catch (err) {
+    clearTimeout(slow); setBuffering(false);
+    if (tok !== state.token || err.message === 'dropped') return;
+    if (piper.error) { pause(); toast("The voice didn't download. Check your connection and press play again."); return; }
+    if (state.playing) { toast('Skipped a sentence the voice could not read'); advance(i); }
+    return;
+  }
+  clearTimeout(slow); setBuffering(false);
+  if (tok !== state.token || !state.playing) return;
+  const src = actx.createBufferSource();
+  src.buffer = buf;
+  src.connect(actx.destination);
+  src.onended = () => {
+    if (tok !== state.token || !state.playing) return;
+    const s = b.sentences[i];
+    const gap = (s.title ? 650 : s.pe ? 380 : 140) / state.rate;
+    setTimeout(() => { if (tok === state.token && state.playing) advance(i); }, gap);
+  };
+  state.src = src;
+  src.start();
+}
+function play() {
+  if (!state.book) return;
+  const eng = engine();
+  if (eng === 'web' && !synth) { toast('Pick a natural voice in the Voice menu to listen in this browser.'); return; }
+  if (eng === 'piper') ensureAudio();
+  state.playing = true; setPlayingUI();
+  if (synth) synth.resume();
+  speak(state.idx);
+}
+function pause() {
+  state.playing = false; state.token++;
+  if (synth) synth.cancel();
+  stopAudio(); piperReset(); setBuffering(false);
+  setPlayingUI(); savePos();
+}
+function seek(i, autoplay) {
+  const b = state.book; if (!b) return;
+  i = Math.max(0, Math.min(b.sentences.length - 1, i));
+  state.idx = i;
+  if (state.playing || autoplay) {
+    if (state.playing) { stopAudio(); piperReset(); }
+    if (!state.playing) { play(); return; }
+    speak(i);
+  } else { mark(i, true); savePos(); }
+}
+function seekChapter(ci, autoplay) {
+  const b = state.book;
+  ci = Math.max(0, Math.min(b.chapters.length - 1, ci));
+  seek(b.chapters[ci].start, autoplay);
+  if (!state.follow || !state.playing) window.scrollTo({ top: $('.layout').offsetTop - 12, behavior: 'auto' });
+}
+function curCh() { return state.book.sentences[state.idx].ch; }
+
+/* ---------- Sleep timer ---------- */
+function clearSleep() {
+  clearInterval(state.sleepTimer); state.sleepTimer = null; state.sleep = 'off';
+  el.sleep.value = 'off'; el.sleepLabel.textContent = 'Sleep';
+}
+function setSleep(v) {
+  clearInterval(state.sleepTimer); state.sleepTimer = null; state.sleep = v;
+  el.sleepLabel.textContent = 'Sleep';
+  if (v === 'off' || v === 'chapter') return;
+  state.sleepEnd = Date.now() + (+v) * 60000;
+  const tick = () => {
+    const left = (state.sleepEnd - Date.now()) / 1000;
+    if (left <= 0) { pause(); clearSleep(); toast('Sleep timer: playback stopped'); return; }
+    el.sleepLabel.textContent = 'Sleep ' + fmtClock(left);
+  };
+  tick(); state.sleepTimer = setInterval(tick, 1000);
+}
+
+/* ---------- Loading ---------- */
+function loadBook(def) {
+  pause();
+  state.book = buildBook({ title: def.title, author: def.author, pages: def.pages, id: def.id, sample: !!def.sample }, def.chapterDefs);
+  state.renderedCh = -1; lastMarked = null;
+  const saved = store.get('sp:pos:' + state.book.id, 0);
+  state.idx = saved > 0 && saved < state.book.sentences.length ? saved : 0;
+  renderBookInfo(); renderToc(); renderSpine(); populateVoices();
+  mark(state.idx, false);
+  if (state.idx > 0 && !def.sample) toast(`Picking up where you left off, track ${curCh() + 1}`);
+  $('#bSample').hidden = !!def.sample;
+  $('#dropTitle').textContent = def.sample ? 'Drop a PDF book here' : 'Drop another PDF to switch books';
+  $('#dropSub').textContent = def.sample ? 'A sample chapter of Alice in Wonderland is loaded so you can try the player.' : `Now playing: ${state.book.title}`;
+}
+
+function setStatus(msg, frac, isErr) {
+  $('#status').hidden = !msg;
+  const line = $('#statusLine');
+  line.textContent = msg || '';
+  line.classList.toggle('err', !!isErr);
+  $('#statusBar').parentElement.hidden = !!isErr;
+  $('#statusBar').style.width = Math.round((frac || 0) * 100) + '%';
+}
+
+let busy = false;
+async function handleFile(file) {
+  if (!file || busy) return;
+  if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') { setStatus(`“${file.name}” isn't a PDF. Choose a file that ends in .pdf.`, 0, true); return; }
+  if (!window.pdfjsLib) { setStatus('The PDF reader did not load. Check your connection and reload the page.', 0, true); return; }
+  busy = true; $('#bChoose').disabled = true;
+  try {
+    setStatus('Opening the file…', 0);
+    const def = await parsePdf(file, (m, f) => setStatus(m, f));
+    loadBook(def);
+    setStatus('');
+    toast(`Ready: ${state.book.chapters.length} tracks, about ${fmtDur(state.book.words / BASE_WPM)} of listening`);
+  } catch (e) {
+    console.error(e);
+    if (e && e.message === 'NOTEXT') setStatus('This PDF has no selectable text, so it is probably scanned images. Run it through OCR first, then try again.', 0, true);
+    else if (e && e.name === 'PasswordException') setStatus('This PDF is password-protected. Remove the password and try again.', 0, true);
+    else setStatus('This file could not be read as a PDF. Try exporting it again or choose another file.', 0, true);
+  } finally {
+    busy = false; $('#bChoose').disabled = false;
+  }
+}
+
+/* ---------- Events ---------- */
+$('#bChoose').addEventListener('click', () => $('#file').click());
+$('#file').addEventListener('change', (e) => { handleFile(e.target.files[0]); e.target.value = ''; });
+$('#bSample').addEventListener('click', () => { setStatus(''); loadBook(SAMPLE); });
+
+let dragDepth = 0;
+window.addEventListener('dragenter', (e) => { if ([...(e.dataTransfer?.types || [])].includes('Files')) { dragDepth++; document.body.classList.add('dragging'); } });
+window.addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) document.body.classList.remove('dragging'); });
+window.addEventListener('dragover', (e) => e.preventDefault());
+window.addEventListener('drop', (e) => {
+  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
+  const f = e.dataTransfer?.files?.[0]; if (f) handleFile(f);
+});
+
+el.play.addEventListener('click', () => state.playing ? pause() : play());
+$('#bBack').addEventListener('click', () => seek(state.idx - 1));
+$('#bFwd').addEventListener('click', () => seek(state.idx + 1));
+$('#bPrevCh').addEventListener('click', () => {
+  const ch = state.book.chapters[curCh()];
+  seekChapter(state.idx - ch.start > 2 ? curCh() : curCh() - 1);
+});
+$('#bNextCh').addEventListener('click', () => seekChapter(curCh() + 1));
+
+el.text.addEventListener('click', (e) => {
+  const s = e.target.closest('.s');
+  if (s) { seek(+s.dataset.i, true); return; }
+  const b = e.target.closest('[data-ch]');
+  if (b) seekChapter(+b.dataset.ch, state.playing);
+});
+el.toc.addEventListener('click', (e) => {
+  const b = e.target.closest('.track'); if (!b) return;
+  document.body.classList.remove('toc-open');
+  seekChapter(+b.dataset.ch, state.playing);
+});
+
+function spineSeek(clientX) {
+  const r = el.spine.getBoundingClientRect();
+  const f = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+  const target = f * state.book.words, ss = state.book.sentences;
+  let lo = 0, hi = ss.length - 1;
+  while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (ss[mid].before <= target) lo = mid; else hi = mid - 1; }
+  seek(lo);
+}
+el.spine.addEventListener('click', (e) => spineSeek(e.clientX));
+el.spine.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') { e.preventDefault(); e.stopPropagation(); seekChapter(curCh() + 1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); e.stopPropagation(); seekChapter(curCh() - 1); }
+});
+
+el.rate.value = String(state.rate);
+if (!el.rate.value) { el.rate.value = '1'; state.rate = 1; }
+el.rate.addEventListener('change', () => {
+  state.rate = +el.rate.value; store.set('sp:rate', state.rate);
+  renderToc(); el.toc.querySelectorAll('.track').forEach(t => t.setAttribute('aria-current', String(+t.dataset.ch === state.renderedCh)));
+  el.trackNum.textContent = `Track ${state.renderedCh + 1} of ${state.book.chapters.length} · ${fmtDur(wordsToSec(state.book.chapters[state.renderedCh].words) / 60)}`;
+  updateProgress();
+  piperReset();
+  if (state.playing) { stopAudio(); speak(state.idx); }
+});
+el.voice.addEventListener('change', () => selectVoice(el.voice.value, true));
+$('#bSave').addEventListener('click', saveTrack);
+el.sleep.addEventListener('change', () => setSleep(el.sleep.value));
+$('#follow').addEventListener('change', (e) => { state.follow = e.target.checked; if (state.follow) mark(state.idx, true); });
+
+$('#bTracks').addEventListener('click', () => document.body.classList.add('toc-open'));
+$('#bTocClose').addEventListener('click', () => document.body.classList.remove('toc-open'));
+$('#scrim').addEventListener('click', () => document.body.classList.remove('toc-open'));
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, select, textarea, [contenteditable]')) return;
+  if (e.key === 'Escape') document.body.classList.remove('toc-open');
+  if (!state.book) return;
+  if (e.key === ' ' && !e.target.closest('button')) { e.preventDefault(); state.playing ? pause() : play(); }
+  else if (e.key === 'ArrowRight' && !e.target.closest('button')) { e.preventDefault(); e.shiftKey ? seekChapter(curCh() + 1) : seek(state.idx + 1); }
+  else if (e.key === 'ArrowLeft' && !e.target.closest('button')) { e.preventDefault(); e.shiftKey ? seekChapter(curCh() - 1) : seek(state.idx - 1); }
+});
+
+const deck = $('#deck');
+const setDeckH = () => document.documentElement.style.setProperty('--deck-h', deck.offsetHeight + 'px');
+if ('ResizeObserver' in window) new ResizeObserver(() => { setDeckH(); }).observe(deck);
+window.addEventListener('resize', () => { setDeckH(); if (state.book) renderSpine(); });
+setDeckH();
+
+/* ---------- Boot ---------- */
+if (synth) {
+  loadVoices();
+  if (typeof synth.addEventListener === 'function') synth.addEventListener('voiceschanged', loadVoices);
+  else synth.onvoiceschanged = loadVoices;
+}
+window.addEventListener('pagehide', () => { savePos(); if (synth) synth.cancel(); });
+setPlayingUI();
+loadBook(SAMPLE);
+piperCheck();
+})();
+</script>
