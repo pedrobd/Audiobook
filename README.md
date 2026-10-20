@@ -17,7 +17,7 @@ Para as usares, publica a pasta `docs` num destes serviços (todos gratuitos):
 ### GitHub Pages
 1. No repositório, vai a **Settings › Pages**.
 2. Em *Build and deployment*, escolhe **Deploy from a branch**, a branch `main` e a pasta `/docs`, e guarda.
-3. Ao fim de um minuto, o site fica disponível em `https://pedrobd.github.io/audiobook/`.
+3. Ao fim de um minuto, o site fica disponível em `https://pedrobd.github.io/Audiobook/`.
 
 ### Netlify Drop (alternativa)
 Abre https://app.netlify.com/drop e arrasta a pasta `docs` para a página.
